@@ -5,6 +5,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.*;
+
+
 /**
  * Класс описывает продукт питания, входящий в состав блюда.
  */
@@ -12,11 +15,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Entity
+@Table(name = "products")
 public class Product {
     /**
      * Уникальный идентификатор продукта
      */
     @EqualsAndHashCode.Include
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     /**
      * Название продукта
@@ -25,5 +32,7 @@ public class Product {
     /**
      * Единица измерения (кг. , шт. и.т.д.)
      */
-    private String unit;
+    @ManyToOne
+    @JoinColumn(name = "unit_id")
+    private MeasureUnit unit;
 }

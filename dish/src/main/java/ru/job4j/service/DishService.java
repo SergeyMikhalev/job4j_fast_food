@@ -2,6 +2,9 @@ package ru.job4j.service;
 
 import ru.job4j.model.Dish;
 
+import java.util.List;
+import java.util.Optional;
+
 /**
  * Сервис работы со списком блюд, которые есть в нашем заведении.
  * Представляет собой CRUD interface.
@@ -9,9 +12,9 @@ import ru.job4j.model.Dish;
 public interface DishService {
     void create(Dish dish);
 
-    Dish find(int id);
+    Optional<Dish> find(int id);
 
-    Dish findAll();
+    List<Dish> findAll();
 
     void update(Dish dish);
 

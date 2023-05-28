@@ -4,6 +4,8 @@ import ru.job4j.model.BonusCard;
 import ru.job4j.model.Order;
 import ru.job4j.model.OrderStatus;
 
+import java.util.Optional;
+
 /**
  * Сервис оформления заказов еды
  */
@@ -28,4 +30,6 @@ public interface OrderService {
      * @return enum OrderStatus статус заказа
      */
     OrderStatus getOrderStatus(int orderId);
+
+    Optional<Order> getOrder(int orderId);
 }

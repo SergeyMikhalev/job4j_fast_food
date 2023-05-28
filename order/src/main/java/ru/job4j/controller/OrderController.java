@@ -9,9 +9,11 @@ import ru.job4j.model.Order;
 import ru.job4j.model.OrderStatus;
 import ru.job4j.service.OrderService;
 
+import java.util.Optional;
+
 @RestController
 @AllArgsConstructor
-@RequestMapping("/order")
+@RequestMapping("/orders")
 public class OrderController {
     private final OrderService orderService;
 
@@ -28,6 +30,15 @@ public class OrderController {
     @GetMapping("/status/{id}")
     public ResponseEntity<OrderStatus> getOrderStatus(@PathVariable int id) {
         return new ResponseEntity<>(orderService.getOrderStatus(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Order> getOrder(@PathVariable int id) {
+        Optional<Order> order = orderService.getOrder(id);
+        if (order.isEmpty()) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(order.get(), HttpStatus.OK);
     }
 
 }
