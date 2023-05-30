@@ -1,6 +1,7 @@
 package ru.job4j.service;
 
 import lombok.AllArgsConstructor;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.job4j.model.BonusCard;
@@ -17,14 +18,17 @@ import java.util.Optional;
 @AllArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
-    public static final String DISH_SERVICE_URL = "http://localhost:80/dishes/";
+    public static final String DISH_SERVICE_URL = "http://localhost:8091/dishes/";
     private final OrderRepository orderRepository;
 
     private final RestTemplate client;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
     public Order createOrder(Order order) {
-        throw new UnsupportedOperationException("Функционал создания заказа пока не реализован");
+        //todo добавить сохоанение в базу данных
+        kafkaTemplate.send("job4j_orders", order);
+        return order;
     }
 
     @Override

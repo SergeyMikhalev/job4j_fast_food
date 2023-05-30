@@ -43,6 +43,7 @@ public class Dish {
             joinColumns = {@JoinColumn(name = "dish_id")},
             inverseJoinColumns = {@JoinColumn(name = "dish_element_id")}
     )
+    @Builder.Default
     private Set<DishElement> products = new HashSet<>();
     /**
      * Цена блюда за одну порцию (развесовка порций стандартная!)

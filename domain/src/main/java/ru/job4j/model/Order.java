@@ -33,6 +33,7 @@ public class Order {
     /**
      * Сптсок блюд в заказе
      */
+    @Builder.Default
     private List<Dish> dishes = new ArrayList<>();
 
     /**
