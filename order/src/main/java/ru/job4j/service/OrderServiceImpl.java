@@ -4,10 +4,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import ru.job4j.model.BonusCard;
-import ru.job4j.model.Dish;
-import ru.job4j.model.Order;
-import ru.job4j.model.OrderStatus;
+import ru.job4j.model.*;
 import ru.job4j.repository.OrderRepository;
 
 import java.util.ArrayList;
@@ -28,6 +25,12 @@ public class OrderServiceImpl implements OrderService {
     public Order createOrder(Order order) {
         //todo добавить сохоанение в базу данных
         kafkaTemplate.send("job4j_orders", order);
+        kafkaTemplate.send("job4j_notifications",
+                Notification.of()
+                        .recipientId(order.getCustomerId())
+                        .message("Создан заказ " + order)
+                        .build()
+        );
         return order;
     }
 

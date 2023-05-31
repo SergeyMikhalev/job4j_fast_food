@@ -1,9 +1,6 @@
 package ru.job4j.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -12,12 +9,16 @@ import javax.persistence.*;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
-@Table(name = "messages")
-public class Message {
+@Table(name = "notifications")
+@Builder(builderMethodName = "of")
+public class Notification {
     @EqualsAndHashCode.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
+    @Column(name = "recipient_id")
+    private int recipientId;
 
     private String message;
 
