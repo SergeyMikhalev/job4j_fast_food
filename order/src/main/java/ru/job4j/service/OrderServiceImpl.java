@@ -1,11 +1,13 @@
 package ru.job4j.service;
 
 import lombok.AllArgsConstructor;
+import org.apache.kafka.common.quota.ClientQuotaAlteration;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import ru.job4j.mapper.OrderOrderEntityMapper;
 import ru.job4j.model.*;
-import ru.job4j.repository.OrderRepository;
+import ru.job4j.repository.OrderEntityRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,14 +18,16 @@ import java.util.Optional;
 public class OrderServiceImpl implements OrderService {
 
     public static final String DISH_SERVICE_URL = "http://localhost:8091/dishes/";
-    private final OrderRepository orderRepository;
+    private final OrderOrderEntityMapper mapper;
+    private final OrderEntityRepository orderEntityRepository;
 
     private final RestTemplate client;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
     public Order createOrder(Order order) {
-        //todo добавить сохоанение в базу данных
+        OrderEntity orderEntity = mapper.orderToOrderEntity(order);
+        orderEntityRepository.save(orderEntity);
         kafkaTemplate.send("job4j_orders", order);
         kafkaTemplate.send("job4j_notifications",
                 Notification.of()
@@ -31,6 +35,7 @@ public class OrderServiceImpl implements OrderService {
                         .message("Создан заказ " + order)
                         .build()
         );
+        System.out.println(orderEntity);
         return order;
     }
 
@@ -46,11 +51,13 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Optional<Order> getOrder(int orderId) {
-        Optional<Order> order = orderRepository.getById(orderId);
+        Optional<OrderEntity> orderEntity =  orderEntityRepository.findById(orderId);
         List<Dish> detailedDishes = new ArrayList<>();
         int totalCost = 0;
-        if (order.isPresent()) {
-            for (Dish dish : order.get().getDishes()) {
+        Order order = null;
+        if (orderEntity.isPresent()) {
+            order = mapper.orderEntityToOrder(orderEntity.get());
+            for (Dish dish : order.getDishes()) {
                 Dish dishFromApi = client.getForEntity(DISH_SERVICE_URL + dish.getId(), Dish.class).getBody();
                 if (null == dishFromApi) {
                     throw new IllegalStateException();
@@ -61,11 +68,11 @@ public class OrderServiceImpl implements OrderService {
                  */
                 totalCost += dishFromApi.getPrice();
             }
-            order.get().setCost(totalCost);
-            order.get().setDishes(detailedDishes);
+            order.setCost(totalCost);
+            order.setDishes(detailedDishes);
 
         }
 
-        return order;
+        return Optional.ofNullable(order);
     }
 }
