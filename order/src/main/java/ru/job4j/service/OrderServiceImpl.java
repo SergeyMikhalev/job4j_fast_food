@@ -1,6 +1,7 @@
 package ru.job4j.service;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.quota.ClientQuotaAlteration;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class OrderServiceImpl implements OrderService {
 
     public static final String DISH_SERVICE_URL = "http://localhost:8091/dishes/";
@@ -26,16 +28,18 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order createOrder(Order order) {
+        log.info("Запрос на создание заказа "+order);
         OrderEntity orderEntity = mapper.orderToOrderEntity(order);
-        orderEntityRepository.save(orderEntity);
-        kafkaTemplate.send("job4j_orders", order);
+        OrderEntity savedOrderEntity = orderEntityRepository.save(orderEntity);
+        kafkaTemplate.send("job4j_orders", savedOrderEntity);
         kafkaTemplate.send("job4j_notifications",
                 Notification.of()
                         .recipientId(order.getCustomerId())
-                        .message("Создан заказ " + order)
+                        .message("Создан заказ " + savedOrderEntity)
                         .build()
         );
-        System.out.println(orderEntity);
+        log.info("Заказ "+savedOrderEntity + " сохранен в БД.");
+        order.setId(savedOrderEntity.getId());
         return order;
     }
 
